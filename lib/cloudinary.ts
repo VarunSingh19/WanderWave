@@ -1,0 +1,24 @@
+import { v2 as cloudinary } from "cloudinary";
+
+const CLOUDINARY_CLOUD_NAME = "dvbw76boh";
+const CLOUDINARY_API_KEY = "Vo8HobpUEydUNcPg8GNw916jupI";
+const CLOUDINARY_API_SECRET = "988965663417232";
+cloudinary.config({
+  cloud_name: CLOUDINARY_CLOUD_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
+});
+
+export const uploadImage = async (file: string): Promise<string> => {
+  try {
+    const result = await cloudinary.uploader.upload(file, {
+      folder: "travel-planner",
+    });
+    return result.secure_url;
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    throw new Error("Failed to upload image");
+  }
+};
+
+export default cloudinary;
