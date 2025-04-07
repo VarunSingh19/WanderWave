@@ -25,10 +25,16 @@ export async function GET(
       .populate("members.user", "name email profileImage")
       .populate({
         path: "expenses",
-        populate: {
-          path: "addedBy",
-          select: "name email profileImage",
-        },
+        populate: [
+          {
+            path: "addedBy",
+            select: "name email profileImage",
+          },
+          {
+            path: "shares.user",
+            select: "name email profileImage",
+          },
+        ],
       });
 
     if (!trip) {
@@ -44,14 +50,46 @@ export async function GET(
 
     const isPublic = trip.isPublic;
 
-    if (!isMember && !isPublic) {
+    if (!isMember) {
+      if (isPublic) {
+        // For public trips, allow viewing basic info but not full access
+        // This allows users to request to join
+        const publicTripInfo = {
+          _id: trip._id,
+          name: trip.name,
+          description: trip.description,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          category: trip.category,
+          isPublic: trip.isPublic,
+          thumbnail: trip.thumbnail,
+          minMembers: trip.minMembers,
+          members: trip.members.map((member: any) => ({
+            user: {
+              _id: member.user._id,
+              name: member.user.name,
+              email: member.user.email,
+              profileImage: member.user.profileImage,
+            },
+            role: member.role,
+            status: member.status,
+          })),
+        };
+
+        return NextResponse.json({
+          trip: publicTripInfo,
+          access: "limited",
+        });
+      }
+
+      // If private and not a member, deny access
       return NextResponse.json(
         { error: "You do not have access to this trip" },
         { status: 403 }
       );
     }
 
-    return NextResponse.json({ trip });
+    return NextResponse.json({ trip, access: "full" });
   } catch (error: any) {
     console.error("Error fetching trip:", error);
     return NextResponse.json(
@@ -100,6 +138,29 @@ export async function PUT(
         { error: "You do not have permission to update this trip" },
         { status: 403 }
       );
+    }
+
+    // Validate minMembers
+    if (updateData.minMembers !== undefined) {
+      const minMembersCount = parseInt(updateData.minMembers);
+
+      if (isNaN(minMembersCount) || minMembersCount < 1) {
+        return NextResponse.json(
+          { error: "Minimum members must be at least 1" },
+          { status: 400 }
+        );
+      }
+
+      const acceptedMembersCount = trip.members.filter(
+        (member: any) => member.status === MemberStatus.ACCEPTED
+      ).length;
+
+      if (minMembersCount > 20) {
+        return NextResponse.json(
+          { error: "Minimum members cannot exceed 20" },
+          { status: 400 }
+        );
+      }
     }
 
     // Update trip

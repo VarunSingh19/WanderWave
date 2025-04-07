@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -18,12 +19,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
-import { formatCurrency } from "@/lib/utils"
-import { ArrowLeft, Wallet, ArrowUpRight, CheckCircle } from "lucide-react"
+import { formatCurrency, formatDate, calculateDaysLeft } from "@/lib/utils"
+import { ArrowLeft, Wallet, ArrowUpRight, CheckCircle, ArrowDownLeft, Clock, XCircle } from "lucide-react"
 
 interface Trip {
   _id: string
   name: string
+  startDate: Date
+  endDate: Date
   wallet: {
     balance: number
     pendingWithdrawal: boolean
@@ -41,13 +44,30 @@ interface Trip {
   }[]
 }
 
+interface Transaction {
+  _id: string
+  type: string
+  amount: number
+  status: string
+  description: string
+  createdAt: string
+  user: {
+    _id: string
+    name: string
+    email: string
+    profileImage?: string
+  }
+}
+
 export default function TripWalletPage() {
   const { data: session, status } = useSession()
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
   const [trip, setTrip] = useState<Trip | null>(null)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [transactionsLoading, setTransactionsLoading] = useState(true)
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false)
   const [withdrawAmount, setWithdrawAmount] = useState<number>(0)
   const [isProcessingWithdrawal, setIsProcessingWithdrawal] = useState(false)
@@ -60,6 +80,7 @@ export default function TripWalletPage() {
 
     if (status === "authenticated") {
       fetchTrip()
+      fetchTransactions()
     }
   }, [status, router, tripId])
 
@@ -81,6 +102,22 @@ export default function TripWalletPage() {
     }
   }
 
+  const fetchTransactions = async () => {
+    try {
+      setTransactionsLoading(true)
+      const response = await fetch(`/api/trips/${tripId}/wallet/transactions`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setTransactions(data.transactions)
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error)
+    } finally {
+      setTransactionsLoading(false)
+    }
+  }
+
   const handleWithdraw = async () => {
     if (!trip) return
 
@@ -89,6 +126,12 @@ export default function TripWalletPage() {
     try {
       if (withdrawAmount <= 0 || withdrawAmount > trip.wallet.balance) {
         throw new Error(`Amount must be between 1 and ${trip.wallet.balance}`)
+      }
+
+      // Check if trip has started (2-day rule)
+      const daysLeft = calculateDaysLeft(trip.startDate, trip.endDate)
+      if (daysLeft < 2) {
+        throw new Error("Withdrawals can only be initiated at least 2 days before the trip starts")
       }
 
       const response = await fetch(`/api/trips/${tripId}/wallet/withdraw`, {
@@ -112,6 +155,7 @@ export default function TripWalletPage() {
 
       setIsWithdrawDialogOpen(false)
       fetchTrip()
+      fetchTransactions()
     } catch (error: any) {
       toast({
         title: "Withdrawal failed",
@@ -149,12 +193,64 @@ export default function TripWalletPage() {
       })
 
       fetchTrip()
+      fetchTransactions()
     } catch (error: any) {
       toast({
         title: "Approval failed",
         description: error.message,
         variant: "destructive",
       })
+    }
+  }
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case "payment":
+        return <ArrowUpRight className="w-5 h-5 text-blue-500" />
+      case "withdrawal":
+        return <ArrowUpRight className="w-5 h-5 text-red-500" />
+      case "deposit":
+        return <ArrowDownLeft className="w-5 h-5 text-green-500" />
+      default:
+        return <Wallet className="w-5 h-5 text-gray-500" />
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-500" />
+      case "failed":
+        return <XCircle className="w-4 h-4 text-red-500" />
+      default:
+        return null
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            Completed
+          </Badge>
+        )
+      case "pending":
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            Pending
+          </Badge>
+        )
+      case "failed":
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            Failed
+          </Badge>
+        )
+      default:
+        return null
     }
   }
 
@@ -186,8 +282,9 @@ export default function TripWalletPage() {
   }
 
   const isAuthor = trip.members.some((member) => member.user._id === session?.user.id && member.role === "author")
-
   const hasApproved = trip.wallet.withdrawalApprovals.includes(session?.user.id || "")
+  const daysLeft = calculateDaysLeft(trip.startDate, trip.endDate)
+  const canWithdraw = daysLeft >= 2
 
   return (
     <div className="container px-4 py-8 mx-auto">
@@ -221,7 +318,7 @@ export default function TripWalletPage() {
             {isAuthor && trip.wallet.balance > 0 && !trip.wallet.pendingWithdrawal && (
               <Dialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="w-full">
+                  <Button className="w-full" disabled={!canWithdraw}>
                     <ArrowUpRight className="w-4 h-4 mr-2" />
                     Withdraw Funds
                   </Button>
@@ -260,6 +357,12 @@ export default function TripWalletPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+            )}
+
+            {!canWithdraw && isAuthor && (
+              <p className="mt-2 text-sm text-amber-600">
+                Withdrawals are only allowed at least 2 days before trip starts
+              </p>
             )}
           </CardContent>
         </Card>
@@ -302,7 +405,102 @@ export default function TripWalletPage() {
           </Card>
         )}
       </div>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-2xl font-semibold">Transaction History</h2>
+        <Tabs defaultValue="all">
+          <TabsList className="mb-6">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+            <TabsTrigger value="deposits">Deposits</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all">
+            {renderTransactions(transactions)}
+          </TabsContent>
+
+          <TabsContent value="payments">
+            {renderTransactions(transactions.filter((t) => t.type === "payment"))}
+          </TabsContent>
+
+          <TabsContent value="withdrawals">
+            {renderTransactions(transactions.filter((t) => t.type === "withdrawal"))}
+          </TabsContent>
+
+          <TabsContent value="deposits">
+            {renderTransactions(transactions.filter((t) => t.type === "deposit"))}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
-}
 
+  function renderTransactions(transactions: Transaction[]) {
+    if (transactionsLoading) {
+      return (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="w-full h-20" />
+          ))}
+        </div>
+      )
+    }
+
+    if (transactions.length === 0) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+            <Wallet className="w-12 h-12 mb-4 text-gray-400" />
+            <h3 className="mb-2 text-xl font-semibold">No transactions</h3>
+            <p className="text-gray-600">There are no transactions in this category yet.</p>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    return (
+      <div className="space-y-4">
+        {transactions.map((transaction) => (
+          <Card key={transaction._id}>
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-10 h-10 mr-4 bg-gray-100 rounded-full">
+                  {getTransactionIcon(transaction.type)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center">
+                    <h3 className="font-medium">{transaction.description}</h3>
+                    <div className="ml-2">{getStatusBadge(transaction.status)}</div>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span>{formatDate(transaction.createdAt)}</span>
+                    <span className="mx-1">•</span>
+                    <span>By: {transaction.user.name}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div
+                    className={`text-lg font-semibold ${transaction.type === "deposit"
+                        ? "text-green-600"
+                        : transaction.type === "withdrawal" || transaction.type === "payment"
+                          ? "text-red-600"
+                          : ""
+                      }`}
+                  >
+                    {transaction.type === "deposit"
+                      ? "+"
+                      : transaction.type === "withdrawal" || transaction.type === "payment"
+                        ? "-"
+                        : ""}
+                    {formatCurrency(transaction.amount)}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+}

@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import crypto from "crypto"
 import connectDB from "@/lib/db"
-import Transaction, { TransactionStatus } from "@/lib/models/transaction.model"
+import Transaction, { TransactionStatus, TransactionType } from "@/lib/models/transaction.model"
 import Expense, { PaymentStatus } from "@/lib/models/expense.model"
 import Trip from "@/lib/models/trip.model"
+import User from "@/lib/models/user.model"
 import { authOptions } from "@/lib/auth"
 
 export async function POST(req: NextRequest) {
@@ -50,42 +51,68 @@ export async function POST(req: NextRequest) {
     transaction.paymentId = razorpay_payment_id
     await transaction.save()
 
-    // Update expense share
-    const expense = await Expense.findById(transaction.expense)
-
-    if (!expense) {
-      return NextResponse.json({ error: "Expense not found" }, { status: 404 })
-    }
-
-    const userShareIndex = expense.shares.findIndex((share) => share.user.toString() === userId)
-
-    if (userShareIndex === -1) {
-      return NextResponse.json({ error: "Share not found" }, { status: 404 })
-    }
-
-    // Update share amount paid
-    expense.shares[userShareIndex].amountPaid += transaction.amount
-
-    // Update share status
-    if (expense.shares[userShareIndex].amountPaid >= expense.shares[userShareIndex].amount) {
-      expense.shares[userShareIndex].status = PaymentStatus.COMPLETED
-    } else {
-      expense.shares[userShareIndex].status = PaymentStatus.PARTIAL
-    }
-
-    await expense.save()
-
-    // Check if all shares are paid
-    const allPaid = expense.shares.every((share) => share.status === PaymentStatus.COMPLETED)
-
-    if (allPaid) {
-      // Add to trip wallet
-      const trip = await Trip.findById(transaction.trip)
-
-      if (trip) {
-        trip.wallet.balance += expense.amount
-        await trip.save()
+    // Handle based on transaction type
+    if (transaction.type === TransactionType.DEPOSIT) {
+      // Handle wallet deposit
+      const user = await User.findById(userId)
+      if (user) {
+        user.wallet.balance += transaction.amount
+        await user.save()
       }
+
+      return NextResponse.json({
+        message: "Payment verified successfully",
+        transaction: {
+          id: transaction._id,
+          status: transaction.status,
+        },
+      })
+    } else if (transaction.type === TransactionType.PAYMENT && transaction.expense) {
+      // Update expense share
+      const expense = await Expense.findById(transaction.expense)
+
+      if (!expense) {
+        return NextResponse.json({ error: "Expense not found" }, { status: 404 })
+      }
+
+      const userShareIndex = expense.shares.findIndex((share) => share.user.toString() === userId)
+
+      if (userShareIndex === -1) {
+        return NextResponse.json({ error: "Share not found" }, { status: 404 })
+      }
+
+      // Update share amount paid
+      expense.shares[userShareIndex].amountPaid += transaction.amount
+
+      // Update share status
+      if (expense.shares[userShareIndex].amountPaid >= expense.shares[userShareIndex].amount) {
+        expense.shares[userShareIndex].status = PaymentStatus.COMPLETED
+      } else {
+        expense.shares[userShareIndex].status = PaymentStatus.PARTIAL
+      }
+
+      await expense.save()
+
+      // Check if all shares are paid
+      const allPaid = expense.shares.every((share) => share.status === PaymentStatus.COMPLETED)
+
+      if (allPaid) {
+        // Add to trip wallet
+        const trip = await Trip.findById(transaction.trip)
+
+        if (trip) {
+          trip.wallet.balance += expense.amount
+          await trip.save()
+        }
+      }
+
+      return NextResponse.json({
+        message: "Payment verified successfully",
+        transaction: {
+          id: transaction._id,
+          status: transaction.status,
+        },
+      })
     }
 
     return NextResponse.json({
@@ -100,4 +127,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message || "Failed to verify payment" }, { status: 500 })
   }
 }
-

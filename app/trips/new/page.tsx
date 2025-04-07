@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import Image from "next/image"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -16,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Upload, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { TripCategory } from "@/lib/constants/trip-categories"
@@ -31,29 +32,40 @@ const tripSchema = z
     endDate: z.date({
       required_error: "End date is required",
     }),
-    category: z.nativeEnum(TripCategory),
-    isPublic: z.boolean(),
+    category: z.string({
+      required_error: "Please select a category",
+    }),
+    isPublic: z.boolean().default(false).optional(),
+    thumbnail: z.string().optional(),
+    minMembers: z.number().min(1, "Minimum members must be at least 1").max(20, "Maximum members cannot exceed 20").default(2).optional(),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: "End date must be after start date",
     path: ["endDate"],
   })
 
-type TripFormValues = z.infer<typeof tripSchema>
+type TripFormValues = z.infer<typeof tripSchema> & {
+  isPublic?: boolean;
+  minMembers?: number;
+};
 
 export default function NewTripPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [imageUploadStatus, setImageUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
-  const form = useForm<TripFormValues>({
+  const form = useForm<TripFormValues, any, TripFormValues>({
     resolver: zodResolver(tripSchema),
     defaultValues: {
       name: "",
       description: "",
-      category: TripCategory.OTHER,
-      isPublic: false as boolean,
+      category: Object.keys(TripCategory)[0],
+      isPublic: false,
+      thumbnail: "",
+      minMembers: 2,
     },
   })
 
@@ -62,10 +74,74 @@ export default function NewTripPage() {
     return null
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+
+    const file = e.target.files[0];
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "File too large",
+        description: "Image must be smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create a preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setPreviewImage(previewUrl);
+
+    try {
+      setImageUploadStatus("uploading");
+
+      // Create FormData and append the file
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Upload to server
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload image");
+      }
+
+      const data = await response.json();
+
+      // Set the cloudinary URL in the form
+      form.setValue("thumbnail", data.url);
+      setImageUploadStatus("success");
+
+      toast({
+        title: "Image Uploaded",
+        description: "Thumbnail image has been added to your trip",
+      });
+
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      setImageUploadStatus("error");
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload thumbnail image",
+        variant: "destructive",
+      });
+    }
+  };
+
   async function onSubmit(data: TripFormValues) {
     setIsLoading(true)
 
     try {
+      // If we have a preview image but no thumbnail in the form data
+      if (previewImage && !data.thumbnail) {
+        data.thumbnail = previewImage;
+      }
+
       const response = await fetch("/api/trips", {
         method: "POST",
         headers: {
@@ -222,13 +298,84 @@ export default function NewTripPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(TripCategory).map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category.charAt(0).toUpperCase() + category.slice(1).replace("_", " ")}
+                        {Object.entries(TripCategory).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="minMembers"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minimum Members</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={20}
+                        placeholder="Minimum required members"
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Set the minimum number of members needed for this trip (1-20)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="thumbnail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trip Thumbnail</FormLabel>
+                    <div className="flex flex-col space-y-4">
+                      {previewImage && (
+                        <div className="relative w-full h-48 rounded-md overflow-hidden">
+                          <Image
+                            src={previewImage}
+                            alt="Trip thumbnail preview"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-4">
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              id="thumbnail-upload"
+                              onChange={handleImageUpload}
+                            />
+                            <label
+                              htmlFor="thumbnail-upload"
+                              className="flex items-center justify-center gap-2 h-10 px-4 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                            >
+                              <Upload className="h-4 w-4" />
+                              {imageUploadStatus === "uploading" ? "Uploading..." : "Choose Image"}
+                            </label>
+                          </div>
+                        </FormControl>
+                        <div className="text-sm text-muted-foreground flex items-center">
+                          <Info className="h-4 w-4 mr-1" />
+                          Recommended size: 1200x800 pixels, max 5MB
+                        </div>
+                      </div>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -242,7 +389,7 @@ export default function NewTripPage() {
                     <div className="space-y-0.5">
                       <FormLabel>Make Trip Public</FormLabel>
                       <FormDescription>
-                        Public trips can be viewed by other users in the explore section
+                        Public trips allow other users to request to join your trip
                       </FormDescription>
                     </div>
                     <FormControl>

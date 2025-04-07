@@ -6,36 +6,38 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = session.user.id;
     const searchParams = req.nextUrl.searchParams;
     const isPublic = searchParams.get("public") === "true";
 
     await connectDB();
 
-    let trips;
-
     if (isPublic) {
-      // Get public trips
-      trips = await Trip.find({ isPublic: true })
+      // Get public trips - no authentication needed
+      const publicTrips = await Trip.find({ isPublic: true })
         .populate("members.user", "name email profileImage")
         .sort({ createdAt: -1 });
+
+      return NextResponse.json({ trips: publicTrips });
     } else {
+      // For user's trips, authentication is required
+      const session = await getServerSession(authOptions);
+
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const userId = session.user.id;
+
       // Get user's trips
-      trips = await Trip.find({
+      const userTrips = await Trip.find({
         "members.user": userId,
         "members.status": MemberStatus.ACCEPTED,
       })
         .populate("members.user", "name email profileImage")
         .sort({ createdAt: -1 });
-    }
 
-    return NextResponse.json({ trips });
+      return NextResponse.json({ trips: userTrips });
+    }
   } catch (error: any) {
     console.error("Error fetching trips:", error);
     return NextResponse.json(
@@ -62,11 +64,22 @@ export async function POST(req: NextRequest) {
       category,
       isPublic,
       members,
+      thumbnail,
+      minMembers,
     } = await req.json();
 
     if (!name || !description || !startDate || !endDate || !category) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate minMembers
+    const validMinMembers = minMembers ? parseInt(minMembers) : 2;
+    if (isNaN(validMinMembers) || validMinMembers < 1 || validMinMembers > 20) {
+      return NextResponse.json(
+        { error: "Minimum members must be between 1 and 20" },
         { status: 400 }
       );
     }
@@ -81,6 +94,8 @@ export async function POST(req: NextRequest) {
       endDate,
       category,
       isPublic: isPublic || false,
+      thumbnail: thumbnail || "/images/placeholder.jpg", // Use provided thumbnail or default
+      minMembers: validMinMembers,
       members: [
         {
           user: userId,

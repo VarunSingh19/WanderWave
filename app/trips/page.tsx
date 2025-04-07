@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { formatDate, calculateDaysLeft } from "@/lib/utils"
+import { formatDate, calculateDaysLeft, calculateTripDuration } from "@/lib/utils"
 import { PlusCircle, Users, Calendar, Tag } from "lucide-react"
 
 interface Trip {
@@ -66,8 +66,8 @@ export default function TripsPage() {
     }
   }
 
-  const upcomingTrips = trips.filter((trip) => calculateDaysLeft(trip.startDate) >= 0)
-  const pastTrips = trips.filter((trip) => calculateDaysLeft(trip.startDate) < 0)
+  const upcomingTrips = trips.filter((trip) => calculateDaysLeft(trip.startDate, trip.endDate) >= 0)
+  const pastTrips = trips.filter((trip) => calculateDaysLeft(trip.startDate, trip.endDate) < 0)
 
   if (status === "loading" || loading) {
     return (
@@ -152,9 +152,9 @@ export default function TripsPage() {
                     <CardFooter>
                       <div className="w-full">
                         <div className="text-sm font-medium text-right">
-                          {calculateDaysLeft(trip.startDate) === 0
+                          {calculateDaysLeft(trip.startDate, trip.endDate) === 0
                             ? 'Today'
-                            : `${calculateDaysLeft(trip.startDate)} days left`}
+                            : `${calculateDaysLeft(trip.startDate, trip.endDate)} days left (${calculateTripDuration(trip.startDate, trip.endDate)} day trip)`}
                         </div>
                       </div>
                     </CardFooter>

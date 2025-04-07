@@ -13,6 +13,7 @@ export enum MemberStatus {
   PENDING = "pending",
   ACCEPTED = "accepted",
   REJECTED = "rejected",
+  REQUESTED = "requested", // New status for when a user requests to join
 }
 
 export interface ITripMember {
@@ -29,6 +30,8 @@ export interface ITrip extends Document {
   endDate: Date;
   category: TripCategory;
   isPublic: boolean;
+  thumbnail: string; // New field for trip thumbnail
+  minMembers: number; // New field for minimum members required
   members: ITripMember[];
   expenses: mongoose.Types.ObjectId[];
   wallet: {
@@ -66,6 +69,15 @@ const TripSchema = new Schema<ITrip>(
     isPublic: {
       type: Boolean,
       default: false,
+    },
+    thumbnail: {
+      type: String,
+      default: "/images/placeholder.jpg", // Default placeholder image
+    },
+    minMembers: {
+      type: Number,
+      default: 2, // Default minimum members
+      min: 1, // At least 1 member (the author)
     },
     members: [
       {

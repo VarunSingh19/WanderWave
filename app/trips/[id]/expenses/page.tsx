@@ -78,6 +78,15 @@ export default function TripExpensesPage() {
       const data = await response.json()
 
       if (response.ok) {
+        // Populate shares.user with member information
+        data.trip.expenses.forEach((expense: Expense) => {
+          expense.shares.forEach((share) => {
+            const member = data.trip.members.find((member: Member) => member.user._id === share.user._id);
+            if (member) {
+              share.user = member.user;
+            }
+          });
+        });
         setTrip(data.trip)
       } else {
         router.push("/trips")
@@ -142,4 +151,3 @@ export default function TripExpensesPage() {
     </div>
   )
 }
-

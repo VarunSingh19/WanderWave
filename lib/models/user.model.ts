@@ -9,6 +9,7 @@ export interface IUser extends Document {
   address?: string
   bio?: string
   profileImage?: string
+  username?: string
   friends: mongoose.Types.ObjectId[]
   wallet: {
     balance: number
@@ -30,6 +31,13 @@ const UserSchema = new Schema<IUser>(
       trim: true,
       lowercase: true,
       match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email"],
+    },
+    username: {
+      type: String,
+      unique: true,
+      trim: true,
+      sparse: true,
+      lowercase: true,
     },
     password: {
       type: String,
@@ -88,4 +96,3 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string) 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema)
 
 export default User
-

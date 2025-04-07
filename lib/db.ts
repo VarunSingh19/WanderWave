@@ -7,15 +7,22 @@ if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable");
 }
 
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Extend the NodeJS.Global interface to include mongoose
+declare global {
+  var mongoose: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  };
 }
+
+let cached =
+  (global as typeof globalThis).mongoose ||
+  ((global as typeof globalThis).mongoose = { conn: null, promise: null });
 
 async function connectDB() {
   if (cached.conn) {
-    return cached.conn;
+    let cached =
+      global.mongoose || (global.mongoose = { conn: null, promise: null });
   }
 
   if (!cached.promise) {
@@ -23,9 +30,11 @@ async function connectDB() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI, opts)
+      .then((mongooseInstance) => {
+        return mongooseInstance;
+      });
   }
 
   try {

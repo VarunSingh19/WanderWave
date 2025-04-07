@@ -265,12 +265,12 @@ export default function TripMembers({ tripId, members, isAuthor, onUpdate }: Tri
                         {member.status === "accepted" && (
                           <>
                             {member.role === "participant" ? (
-                              <DropdownMenuItem onClick={() => handleMemberAction(member.user._id, null, "co_leader")}>
+                              <DropdownMenuItem onClick={() => handleMemberAction(member.user._id, "", "co_leader")}>
                                 Make Co-Leader
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem
-                                onClick={() => handleMemberAction(member.user._id, null, "participant")}
+                                onClick={() => handleMemberAction(member.user._id, "", "participant")}
                               >
                                 Remove Co-Leader
                               </DropdownMenuItem>
