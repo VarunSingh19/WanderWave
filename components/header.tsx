@@ -103,22 +103,6 @@ export default function Header() {
                   <Compass className="w-4 h-4" />
                   <span>Explore</span>
                 </Link>
-                <Link
-                  href="/friends"
-                  className={`flex items-center space-x-1 transition-colors ${isActive("/friends") ? "text-teal-400 font-medium" : "text-gray-300 hover:text-teal-300"
-                    }`}
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Friends</span>
-                </Link>
-                <Link
-                  href="/messages"
-                  className={`flex items-center space-x-1 transition-colors ${isActive("/messages") ? "text-teal-400 font-medium" : "text-gray-300 hover:text-teal-300"
-                    }`}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Messages</span>
-                </Link>
               </>
             ) : (
               <>
@@ -197,7 +181,7 @@ export default function Header() {
                     className="flex items-center cursor-pointer focus:bg-slate-700 focus:text-teal-300"
                   >
                     <LogOut className="w-4 h-4 mr-2 text-teal-400" />
-                    Logout
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

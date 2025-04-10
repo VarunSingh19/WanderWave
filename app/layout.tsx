@@ -2,18 +2,18 @@ import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { ThemeProvider } from "@/components/theme-provider"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { Toaster } from "@/components/ui/toaster"
-import { Providers } from "./providers"
+import AuthProvider from "@/components/auth-provider"
 import Header from "@/components/header"
-import Footer from "@/components/footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TripFriends - Travel Planning Made Simple",
-  description: "Plan trips with friends, split expenses, and chat in real-time. Your all-in-one platform for group travel planning.",
+  title: "Travel Planner",
+  description: "Plan your trips with friends and manage expenses",
   generator: 'v0.dev'
 }
 
@@ -27,13 +27,18 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          <Header />
-          <main className="min-h-screen pt-16">{children}</main>
-          <Footer />
-          <Toaster />
-        </Providers>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+            <Header />
+            <main className="min-h-screen pt-16">{children}</main>
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )
 }
+
+
+
+import './globals.css'

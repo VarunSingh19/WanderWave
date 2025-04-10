@@ -345,14 +345,19 @@ export default function TripDetailsPage() {
       </div>
 
       {isAuthor && pendingRequests.length > 0 && (
-        <Card className="mb-8 border-blue-200 bg-blue-50">
+        <Card className="mb-8 border-blue-200 bg-blue-50 w-full sm:w-10/12 md:w-8/12 lg:w-6/12 mx-auto">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Pending Join Requests ({pendingRequests.length})</CardTitle>
+            <CardTitle className="text-lg">
+              Pending Join Requests ({pendingRequests.length})
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {pendingRequests.map(request => (
-                <div key={request.user._id} className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                <div
+                  key={request.user._id}
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-white rounded-lg shadow-sm"
+                >
                   <div className="flex items-center">
                     <Avatar className="w-10 h-10 mr-3">
                       <AvatarImage src={request.user.profileImage} alt={request.user.name} />
@@ -363,11 +368,11 @@ export default function TripDetailsPage() {
                       <p className="text-sm text-gray-500">{request.user.email}</p>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3 sm:mt-0 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-green-500 text-green-700 hover:bg-green-50"
+                      className="border-green-500 text-green-700 hover:bg-green-50 w-full sm:w-auto"
                       onClick={() => handleRequestAction(request.user._id, "approve")}
                       disabled={processingRequestIds[request.user._id]}
                     >
@@ -377,7 +382,7 @@ export default function TripDetailsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-red-500 text-red-700 hover:bg-red-50"
+                      className="border-red-500 text-red-700 hover:bg-red-50 w-full sm:w-auto"
                       onClick={() => handleRequestAction(request.user._id, "reject")}
                       disabled={processingRequestIds[request.user._id]}
                     >
@@ -390,6 +395,7 @@ export default function TripDetailsPage() {
             </div>
           </CardContent>
         </Card>
+
       )}
 
       <div className="grid gap-6 mb-8 md:grid-cols-3">

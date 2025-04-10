@@ -1,0 +1,400 @@
+/* Apple Design System Styles */
+
+:root {
+    /* Apple color palette */
+    --apple-black: #1d1d1f;
+    --apple-white: #ffffff;
+    --apple-light-bg: #f5f5f7;
+    --apple-blue: #0066cc;
+    --apple-blue-dark: #0055b3;
+    --apple-green: #34c759;
+    --apple-red: #ff3b30;
+    --apple-orange: #ff9500;
+    --apple-yellow: #ffcc00;
+    --apple-purple: #5856d6;
+    --apple-gray: #86868b;
+    --apple-light-gray: #f5f5f7;
+    --apple-ultra-light-gray: #fafafa;
+
+    /* Typography */
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+
+    /* Shadows */
+    --apple-shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+    --apple-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --apple-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+
+    /* Border radius */
+    --apple-radius-sm: 8px;
+    --apple-radius-md: 12px;
+    --apple-radius-lg: 16px;
+    --apple-radius-xl: 20px;
+}
+
+/* Container */
+.apple-container {
+    font-family: var(--apple-font);
+    background-color: var(--apple-light-bg);
+    color: var(--apple-black);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+}
+
+/* Button */
+.apple-button {
+    background-color: var(--apple-blue);
+    color: var(--apple-white);
+    border: none;
+    border-radius: var(--apple-radius-md);
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apple-button:hover {
+    background-color: var(--apple-blue-dark);
+    transform: translateY(-1px);
+}
+
+.apple-button:active {
+    transform: translateY(0);
+}
+
+.apple-button-secondary {
+    background-color: var(--apple-light-gray);
+    color: var(--apple-black);
+}
+
+.apple-button-secondary:hover {
+    background-color: #e8e8ed;
+}
+
+/* Search */
+.apple-search-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.apple-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: var(--apple-gray);
+}
+
+.apple-search-input {
+    width: 100%;
+    padding: 0.875rem 2.5rem;
+    border-radius: var(--apple-radius-lg);
+    border: none;
+    background-color: var(--apple-white);
+    font-size: 0.95rem;
+    box-shadow: var(--apple-shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.apple-search-input:focus {
+    outline: none;
+    box-shadow: var(--apple-shadow-md), 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.apple-search-clear {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background-color: var(--apple-light-gray);
+    color: var(--apple-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.apple-search-clear:hover {
+    background-color: #e8e8ed;
+    color: var(--apple-black);
+}
+
+/* Tabs */
+.apple-tabs {
+    display: flex;
+    border-radius: var(--apple-radius-lg);
+    background-color: var(--apple-white);
+    padding: 0.25rem;
+    width: fit-content;
+    box-shadow: var(--apple-shadow-sm);
+}
+
+.apple-tab {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: var(--apple-radius-md);
+    border: none;
+    background: transparent;
+    color: var(--apple-gray);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.apple-tab:hover:not(.apple-tab-active) {
+    color: var(--apple-black);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.apple-tab-active {
+    background-color: var(--apple-blue);
+    color: var(--apple-white);
+}
+
+/* Trip Cards */
+.apple-trip-card {
+    background-color: var(--apple-white);
+    border-radius: var(--apple-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--apple-shadow-sm);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.apple-trip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--apple-shadow-md);
+}
+
+.apple-trip-card-image {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+}
+
+.apple-trip-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.apple-trip-card:hover .apple-trip-card-image img {
+    transform: scale(1.05);
+}
+
+.apple-trip-card-category {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.apple-trip-card-content {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.apple-trip-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--apple-black);
+}
+
+.apple-trip-card-description {
+    font-size: 0.95rem;
+    color: var(--apple-gray);
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.apple-trip-card-info {
+    margin-bottom: 1rem;
+}
+
+.apple-trip-card-info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--apple-gray);
+}
+
+.apple-trip-card-info-item svg {
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.apple-trip-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--apple-light-gray);
+}
+
+.apple-trip-days-left {
+    font-weight: 500;
+}
+
+.apple-trip-duration {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--apple-gray);
+}
+
+.apple-trip-card-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease, right 0.3s ease;
+}
+
+.apple-trip-card:hover .apple-trip-card-arrow {
+    opacity: 1;
+    right: 0.75rem;
+}
+
+/* Past trips styling */
+.apple-trip-card-past {
+    opacity: 0.85;
+}
+
+.apple-trip-card-past .apple-trip-card-title {
+    color: var(--apple-gray);
+}
+
+/* Badges */
+.apple-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.apple-badge-blue {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: var(--apple-blue);
+}
+
+.apple-badge-green {
+    background-color: rgba(52, 199, 89, 0.1);
+    color: var(--apple-green);
+}
+
+.apple-badge-orange {
+    background-color: rgba(255, 149, 0, 0.1);
+    color: var(--apple-orange);
+}
+
+.apple-badge-gray {
+    background-color: rgba(134, 134, 139, 0.1);
+    color: var(--apple-gray);
+}
+
+/* Empty state */
+.apple-empty-state {
+    background-color: var(--apple-white);
+    border-radius: var(--apple-radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: var(--apple-shadow-sm);
+}
+
+.apple-empty-state-icon {
+    margin: 0 auto 1.5rem;
+    width: 64px;
+    height: 64px;
+    background-color: var(--apple-light-gray);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apple-empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--apple-black);
+}
+
+.apple-empty-state-description {
+    font-size: 1rem;
+    color: var(--apple-gray);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .apple-container {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .apple-trip-card-image {
+        height: 140px;
+    }
+
+    .apple-trip-card-title {
+        font-size: 1.1rem;
+    }
+
+    .apple-empty-state {
+        padding: 2rem 1.5rem;
+    }
+
+    .apple-empty-state-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .apple-tabs {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .apple-tab {
+        flex: 1;
+        text-align: center;
+    }
+
+    .apple-trip-card-image {
+        height: 120px;
+    }
+}

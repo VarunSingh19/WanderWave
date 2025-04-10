@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Label } from "@/components/ui/label"
 import {
@@ -34,7 +33,6 @@ import {
   Receipt,
   CreditCard,
   Users,
-  ArrowRight,
   Check,
   Clock,
   AlertCircle,
@@ -423,13 +421,13 @@ export default function TripExpenses({ tripId, expenses, members, onUpdate }: Tr
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Expenses</h2>
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => setShowSplitDetails(!showSplitDetails)}
           >
             <Divide className="w-4 h-4 mr-2" />
             {showSplitDetails ? "Hide Split Details" : "Show Split Details"}
-          </Button>
+          </Button> */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
