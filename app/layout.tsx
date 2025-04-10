@@ -32,6 +32,7 @@ export default async function RootLayout({
             <Header />
             <main className="min-h-screen pt-16">{children}</main>
             <Toaster />
+            <Footer />
           </ThemeProvider>
         </AuthProvider>
       </body>
@@ -42,3 +43,4 @@ export default async function RootLayout({
 
 
 import './globals.css'
+import Footer from "@/components/footer"
