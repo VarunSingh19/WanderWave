@@ -321,7 +321,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [windowHeight, setWindowHeight] = useState(0)
   const [menuPosition, setMenuPosition] = useState("top-16")
-  const headerRef = useRef(null)
+  const headerRef = useRef<HTMLDivElement>(null)
 
   // Handle window size for mobile menu positioning
   useEffect(() => {
@@ -368,7 +368,7 @@ export default function Header() {
   // Animation variants for menu items
   const menuItemVariants = {
     hidden: { opacity: 0, y: -10 },
-    visible: (i) => ({
+    visible: (i: number) => ({
       opacity: 1,
       y: 0,
       transition: {
