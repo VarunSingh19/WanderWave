@@ -188,7 +188,7 @@ export const AddMoneyDialog: React.FC<AddMoneyDialogProps> = ({
                                         </label>
                                         <p className="text-[var(--apple-dark-gray)] text-sm mt-1">Pay securely with Stripe</p>
                                     </div>
-                                    <img src="https://same-assets.com/v1/4b767323-058c-4069-a91e-eaa13068dafa/stripe-logo.svg" alt="Stripe" className="h-8" />
+                                    <img src="https://logos-marcas.com/wp-content/uploads/2021/03/Stripe-Emblema.png" alt="Stripe" className="h-8" />
                                 </div>
 
                                 <div className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all hover:border-[var(--apple-blue)/30] hover:bg-[var(--apple-blue)/5] ${paymentMethod === 'razorpay' ? 'border-[var(--apple-blue)] bg-[var(--apple-blue)/5]' : 'border-[var(--apple-light-gray)]'
@@ -201,7 +201,7 @@ export const AddMoneyDialog: React.FC<AddMoneyDialogProps> = ({
                                         </label>
                                         <p className="text-[var(--apple-dark-gray)] text-sm mt-1">Pay using Razorpay</p>
                                     </div>
-                                    <img src="https://same-assets.com/v1/a8e2a4ef-59c2-4e43-bd6c-64a9c36f3d4a/razorpay-logo.svg" alt="Razorpay" className="h-7" />
+                                    <img src="https://w7.pngwing.com/pngs/93/992/png-transparent-razorpay-logo-tech-companies.png" alt="Razorpay" className="h-7" />
                                 </div>
                             </RadioGroup>
                         </div>
@@ -299,7 +299,7 @@ export const AddMoneyDialog: React.FC<AddMoneyDialogProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="apple-dialog max-w-md md:max-w-lg p-0">
+            <DialogContent className="apple-dialog w-full sm:max-w-sm sm:w-full md:max-w-lg p-0">
                 {renderStage()}
             </DialogContent>
         </Dialog>

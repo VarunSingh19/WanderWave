@@ -116,19 +116,19 @@ const testimonials = [
     name: "Sarah Johnson",
     role: "Group traveler",
     content: "WanderWave made our group trip to Europe so much easier to plan. The expense tracking feature saved us from awkward money conversations!",
-    avatar: "/placeholder-user.jpg"
+    avatar: "https://th.bing.com/th/id/OIP.y-nGyqT5AwES8oqp344z4gHaHa?rs=1&pid=ImgDetMain"
   },
   {
     name: "David Chen",
     role: "Adventure traveler",
     content: "I use WanderWave for all my trips now. The real-time chat and split expenses features are game changers for group travel.",
-    avatar: "/placeholder-user.jpg"
+    avatar: "https://i.pinimg.com/originals/07/33/ba/0733ba760b29378474dea0fdbcb97107.png"
   },
   {
     name: "Maria Garcia",
     role: "Family vacation planner",
     content: "Planning family vacations used to be a headache until we found WanderWave. Now everyone stays on the same page!",
-    avatar: "/placeholder-user.jpg"
+    avatar: "https://th.bing.com/th/id/OIP.A7SxbDKPI6I2o9GuBq2A8AAAAA?rs=1&pid=ImgDetMain"
   }
 ]
 

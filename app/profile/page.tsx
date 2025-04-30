@@ -29,6 +29,7 @@ import { formatDate } from "./utils"
 
 // Import CSS
 import "./profile.css"
+import { WalletData } from "../wallet/types"
 
 // Types
 interface Trip {
@@ -86,6 +87,9 @@ export default function ProfilePage() {
   const [recentChats, setRecentChats] = useState<Message[]>([])
   const [friends, setFriends] = useState<Friend[]>([])
 
+  const [walletData, setWalletData] = useState<WalletData | null>(null)
+  const [loading, setLoading] = useState(true)
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -140,17 +144,49 @@ export default function ProfilePage() {
     }
   }
 
+  // const fetchWalletBalance = async () => {
+  //   try {
+  //     const response = await fetch("/api/profile/wallet")
+  //     if (response.ok) {
+  //       const data = await response.json()
+  //       setWalletBalance(data.wallet.balance || 0)
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching wallet balance:", error)
+  //   }
+  // }
+
+  
   const fetchWalletBalance = async () => {
+    if (status !== "authenticated") return
+
     try {
+      setLoading(true)
       const response = await fetch("/api/profile/wallet")
-      if (response.ok) {
-        const data = await response.json()
-        setWalletBalance(data.wallet.balance || 0)
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Auth error - session might have expired
+          router.push("/login")
+          return
+        }
+        throw new Error("Failed to load wallet data")
       }
+
+      const data = await response.json()
+      setWalletData(data)
     } catch (error) {
-      console.error("Error fetching wallet balance:", error)
+      console.error("Error fetching wallet data:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load wallet data",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
     }
   }
+
 
   const fetchRecentTrips = async () => {
     try {

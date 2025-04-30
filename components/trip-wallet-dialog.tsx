@@ -9,11 +9,13 @@ import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
+
 interface TripWalletDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     tripId: string;
 }
+
 
 interface WalletDetails {
     balance: number;
@@ -331,3 +333,7 @@ export default function TripWalletDialog({
         </Dialog>
     );
 }
+
+// https://same.new/chat/clone-httpsgithub-comvarunsingh19wanderwave-git-remix-of-remix-of-remix-of-remix-of-remix-fr5ckqttkm9
+
+// bro still not working and i even cant see the trip wallet amount its not there pls fix and give the full code ok dont give half code bro

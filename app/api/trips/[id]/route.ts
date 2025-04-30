@@ -6,8 +6,8 @@ import Trip, { MemberRole, MemberStatus } from "@/lib/models/trip.model";
 import { authOptions } from "@/lib/auth";
 
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params: { id } }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function GET(
     }
 
     const userId = session.user.id;
-    const tripId = params.id;
+    const tripId = id;
 
     await connectDB();
 
