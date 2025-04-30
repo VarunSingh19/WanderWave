@@ -82,9 +82,10 @@ const AnimatedGlobe = () => {
 // Floating destination tags
 const DestinationTags = () => {
     const destinations = [
-        "Tokyo", "Paris", "New York", "London", "Sydney",
-        "Rome", "Cairo", "Rio", "Bali", "Bangkok"
-    ]
+        "Manali", "Goa", "Jaipur", "Leh", "Kerala",
+        "Rishikesh", "Udaipur", "Darjeeling", "Andaman Islands", "Mysore"
+    ];
+
 
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
