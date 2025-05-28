@@ -62,29 +62,51 @@ function WalletPageContent() {
     }
   }, [status, router])
 
-  const fetchWalletData = async () => {
+  const fetchWalletData = async (retryCount = 0) => {
     if (status !== "authenticated") return
 
     try {
       setLoading(true)
-      const response = await fetch("/api/profile/wallet")
+
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 8000)
+
+      const response = await fetch("/api/profile/wallet", {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
+
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Auth error - session might have expired
           router.push("/login")
           return
         }
-        throw new Error("Failed to load wallet data")
+        throw new Error(`Failed to load wallet data: ${response.status}`)
       }
 
       const data = await response.json()
       setWalletData(data)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching wallet data:", error)
+
+      if (error.name === 'AbortError' || error.message.includes('timeout')) {
+        if (retryCount < 2) {
+          toast({
+            title: "Retrying...",
+            description: `Connection timeout, retrying... (${retryCount + 1}/3)`,
+          })
+          setTimeout(() => fetchWalletData(retryCount + 1), 1000)
+          return
+        }
+      }
+
       toast({
         title: "Error",
-        description: "Failed to load wallet data",
+        description: "Failed to load wallet data. Please refresh the page.",
         variant: "destructive",
       })
     } finally {

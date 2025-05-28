@@ -12,16 +12,22 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET,
 });
 
-export const uploadImage = async (file: string): Promise<string> => {
+export const uploadMedia = async (
+  file: string,
+  resourceType: "image" | "video" = "image"
+): Promise<string> => {
   try {
     const result = await cloudinary.uploader.upload(file, {
-      folder: "travel-planner",
+      folder: "wanderwave-messages",
+      resource_type: resourceType,
     });
     return result.secure_url;
   } catch (error) {
-    console.error("Error uploading image to Cloudinary:", error);
-    throw new Error("Failed to upload image");
+    console.error("Error uploading media to Cloudinary:", error);
+    throw new Error("Failed to upload media");
   }
 };
+
+export const uploadImage = uploadMedia;
 
 export default cloudinary;

@@ -22,24 +22,43 @@ export async function GET(req: NextRequest) {
 
     const userId = session.user.id;
 
-    await connectDB();
+    // Add timeout to prevent hanging requests
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timeout")), 10000)
+    );
 
-    const user = await User.findById(userId).select("wallet");
+    const operationPromise = (async () => {
+      await connectDB();
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+      const user = await User.findById(userId).select("wallet").lean();
 
-    // Get transactions
-    const transactions = await Transaction.find({ user: userId })
-      .populate("trip", "name")
-      .populate("expense", "title")
-      .sort({ createdAt: -1 });
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
 
-    return NextResponse.json({
-      wallet: user.wallet,
-      transactions,
-    });
+      // Initialize wallet if not exists
+      if (!user.wallet) {
+        await User.findByIdAndUpdate(userId, {
+          wallet: { balance: 0, currency: "USD" },
+        });
+        user.wallet = { balance: 0, currency: "USD" };
+      }
+
+      // Get limited transactions for better performance
+      const transactions = await Transaction.find({ user: userId })
+        .populate("trip", "name")
+        .populate("expense", "title")
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean();
+
+      return NextResponse.json({
+        wallet: user.wallet,
+        transactions,
+      });
+    })();
+
+    return await Promise.race([operationPromise, timeoutPromise]);
   } catch (error: any) {
     console.error("Error fetching wallet:", error);
     return NextResponse.json(
