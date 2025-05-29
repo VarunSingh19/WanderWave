@@ -460,7 +460,7 @@ export default function MessagesPage() {
           {(!isMobile || showConversations) && (
             <div className="md:col-span-1">
               <Card className="h-full backdrop-blur-sm bg-white/90 border-0 shadow-2xl rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
+                <CardHeader className="bg-gradient-to-r from-teal-600 via-teal-600 to-teal-600 text-white">
                   <CardTitle className="flex items-center text-lg font-semibold">
                     <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
                       <Users className="w-4 h-4" />
@@ -473,7 +473,7 @@ export default function MessagesPage() {
                     {conversations.length === 0 ? (
                       <div className="p-8 text-center">
                         <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                          <Users className="w-8 h-8 text-blue-500" />
+                          <Users className="w-8 h-8 text-teal-500" />
                         </div>
                         <h3 className="font-semibold text-gray-900 mb-2">No conversations yet</h3>
                         <p className="text-gray-500 text-sm">Start a conversation with your friends</p>
@@ -485,7 +485,7 @@ export default function MessagesPage() {
                             key={conversation.friend._id}
                             onClick={() => selectConversation(conversation.friend._id)}
                             className={`group p-4 rounded-xl cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-lg hover:scale-[1.02] ${selectedFriendId === conversation.friend._id
-                              ? "bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg border-l-4 border-blue-500 scale-[1.02]"
+                              ? "bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg border-l-4 border-teal-500 scale-[1.02]"
                               : "hover:bg-gray-50"
                               }`}
                           >
@@ -496,7 +496,7 @@ export default function MessagesPage() {
                                     src={conversation.friend.profileImage || "/placeholder.svg"}
                                     alt={conversation.friend.name}
                                   />
-                                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+                                  <AvatarFallback className="bg-gradient-to-br from-teal-500 to-teal-500 text-white font-semibold">
                                     {conversation.friend.name.charAt(0).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
@@ -504,11 +504,11 @@ export default function MessagesPage() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-1">
-                                  <h4 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                                  <h4 className="font-semibold text-gray-900 truncate group-hover:text-teal-600 transition-colors">
                                     {conversation.friend.name}
                                   </h4>
                                   {conversation.unreadCount > 0 && (
-                                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                                    <Badge className="bg-gradient-to-r from-teal-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
                                       {conversation.unreadCount}
                                     </Badge>
                                   )}
@@ -539,7 +539,7 @@ export default function MessagesPage() {
               {selectedFriend ? (
                 <Card className="h-full backdrop-blur-sm bg-white/90 border-0 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
                   {/* Header */}
-                  <CardHeader className="flex-shrink-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
+                  <CardHeader className="flex-shrink-0 bg-gradient-to-r from-teal-600 via-teal-600 to-teal-600 text-white">
                     <div className="flex items-center space-x-4">
                       {isMobile && (
                         <Button
@@ -557,7 +557,7 @@ export default function MessagesPage() {
                             src={selectedFriend.profileImage || "/placeholder.svg"}
                             alt={selectedFriend.name}
                           />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+                          <AvatarFallback className="bg-gradient-to-br from-teal-500 to-teal-700 text-white font-semibold">
                             {selectedFriend.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -595,7 +595,7 @@ export default function MessagesPage() {
                       <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg z-10 flex items-center justify-center backdrop-blur-sm">
                         <div className="text-center">
                           <Paperclip className="w-12 h-12 text-blue-500 mx-auto mb-2 animate-bounce" />
-                          <p className="text-blue-600 font-semibold">Drop files here to upload</p>
+                          <p className="text-teal-600 font-semibold">Drop files here to upload</p>
                         </div>
                       </div>
                     )}
@@ -628,7 +628,7 @@ export default function MessagesPage() {
                               <div className={`group max-w-xs lg:max-w-md ${isOwnMessage ? "order-1" : "order-2"}`}>
                                 <div
                                   className={`px-4 py-3 rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl ${isOwnMessage
-                                    ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-br-md"
+                                    ? "bg-gradient-to-r from-teal-500 via-teal-500 to-teal-500 text-white rounded-br-md"
                                     : "bg-white text-gray-900 rounded-bl-md border border-gray-100"
                                     }`}
                                 >
@@ -743,7 +743,7 @@ export default function MessagesPage() {
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-2">
                               {selectedMedia?.type.startsWith("image/") ? (
-                                <ImageIcon className="w-5 h-5 text-blue-500" />
+                                <ImageIcon className="w-5 h-5 text-teal-500" />
                               ) : (
                                 <Video className="w-5 h-5 text-purple-500" />
                               )}
@@ -798,7 +798,7 @@ export default function MessagesPage() {
                             onChange={(e) => setMessageInput(e.target.value)}
                             onKeyPress={handleKeyPress}
                             disabled={sendingMessage || uploading}
-                            className="bg-white border-gray-200 focus:border-blue-400 focus:ring-blue-400 rounded-xl py-3 px-4 text-sm shadow-md focus:shadow-lg transition-all duration-200"
+                            className="bg-white border-gray-200 focus:border-teal-400 focus:ring-teal-400 rounded-xl py-3 px-4 text-sm shadow-md focus:shadow-lg transition-all duration-200"
                           />
                         </div>
 
@@ -812,7 +812,7 @@ export default function MessagesPage() {
                             }
                           }}
                           disabled={sendingMessage || uploading || (!messageInput.trim() && !selectedMedia)}
-                          className="px-6 py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-6 py-3 bg-gradient-to-r from-teal-500 via-teal-700 to-pink-500 hover:from-teal-600 hover:via-teal-800 hover:to-pink-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {sendingMessage || uploading ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
@@ -828,7 +828,7 @@ export default function MessagesPage() {
                 <Card className="h-full backdrop-blur-sm bg-white/90 border-0 shadow-2xl rounded-2xl flex items-center justify-center">
                   <CardContent className="text-center p-12">
                     <div className="w-24 h-24 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-pulse">
-                      <User className="w-12 h-12 text-blue-500" />
+                      <User className="w-12 h-12 text-teal-500" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Select a conversation</h3>
                     <p className="text-gray-500 text-lg max-w-md">
