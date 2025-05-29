@@ -386,6 +386,11 @@ function WalletPageContent() {
     document.getElementById('transaction-history')?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  const handleOpenDialog = () => {
+    console.log("Opening dialog...");
+    setIsAddMoneyDialogOpen(true);
+  }
+
   if (status === "unauthenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--apple-light-bg)] p-4">
@@ -463,7 +468,7 @@ function WalletPageContent() {
           <BalanceCard
             balance={walletData?.wallet.balance || 0}
             formatCurrency={formatCurrency}
-            onAddMoney={() => setIsAddMoneyDialogOpen(true)}
+            onAddMoney={handleOpenDialog}
             onWithdraw={() => setIsWithdrawDialogOpen(true)}
             disableWithdraw={!walletData || walletData.wallet.balance <= 0}
           />
