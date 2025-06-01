@@ -8,7 +8,6 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { LogIn } from "lucide-react"
 import { loadStripe } from "@stripe/stripe-js"
 import { WalletData } from "./types"
-import { testWalletAPI, testRazorpayAPI } from './debug'
 
 // Import components
 import WalletHeader from "./components/WalletHeader"

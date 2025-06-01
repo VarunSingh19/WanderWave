@@ -169,7 +169,7 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
                                 Amount to Withdraw
                             </label>
                             <div className={`relative transition-all duration-200 ${isFocused ? 'ring-2 ring-blue-300 rounded-md' : ''}`}>
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-medium">$</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-medium">₹</span>
                                 <input
                                     id="withdraw-amount"
                                     type="number"
@@ -194,11 +194,11 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
                                         onClick={() => handleQuickAmountSelect(quickAmount)}
                                         disabled={quickAmount > balance}
                                         className={`py-2 px-1 rounded text-sm font-medium transition-colors ${parseFloat(amount) === quickAmount
-                                                ? 'bg-blue-100 text-blue-700 border-blue-300 border'
-                                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
+                                            ? 'bg-blue-100 text-blue-700 border-blue-300 border'
+                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
                                             } ${quickAmount > balance ? 'opacity-40 cursor-not-allowed' : ''}`}
                                     >
-                                        ${quickAmount}
+                                        ₹{quickAmount}
                                     </button>
                                 ))}
                             </div>

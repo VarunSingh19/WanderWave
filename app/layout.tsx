@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth"
 import { Toaster } from "@/components/ui/toaster"
 import AuthProvider from "@/components/auth-provider"
 import Header from "@/components/header"
+import Footer from "@/components/footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -42,5 +43,4 @@ export default async function RootLayout({
 
 
 
-import './globals.css'
-import Footer from "@/components/footer"
+

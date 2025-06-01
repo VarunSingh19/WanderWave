@@ -133,7 +133,7 @@ export const AddMoneyDialog: React.FC<AddMoneyDialogProps> = ({
                                             }`}
                                         onClick={() => handlePredefinedAmountClick(amt)}
                                     >
-                                        ${amt}
+                                        ₹{amt}
                                     </button>
                                 ))}
                             </div>

@@ -13,9 +13,11 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDate, calculateDaysLeft } from "@/lib/utils"
-import { Search, Calendar, Users, Tag, Globe, LogIn, UserPlus, Check, Clock, MapPin } from "lucide-react"
+import { Search, Calendar, Users, Tag, Globe, LogIn, UserPlus, Check, Clock, MapPin, PlusCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { motion } from "framer-motion"
+
+
 
 interface Trip {
   _id: string
@@ -281,10 +283,17 @@ export default function ExplorePage() {
         >
           <Globe className="w-16 h-16 mx-auto mb-5 text-gray-300 dark:text-gray-600" />
           <h3 className="mb-3 text-2xl font-semibold">No adventures found</h3>
+          <Link href="/trips/new" passHref>
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 mt-4 text-sm font-medium text-white bg-teal-600 rounded-md shadow hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition">
+              <PlusCircle className="w-5 h-5" />
+              No Worries! Create Your First Trip
+            </div>
+          </Link>
           <p className="mb-6 text-gray-600 dark:text-gray-400 max-w-md mx-auto">
             {searchTerm
               ? `No trips match your search for "${searchTerm}"`
-              : "There are no public trips available at the moment."}
+              : "There are no public trips available at the moment."
+            }
           </p>
           {searchTerm && (
             <Button
