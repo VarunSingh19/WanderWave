@@ -31,6 +31,8 @@ import {
   Phone,
   VideoIcon,
 } from "lucide-react"
+import CallModal from "@/components/call-modal"
+import { getSocket } from "@/lib/socket-client"
 
 interface Friend {
   _id: string
@@ -86,6 +88,12 @@ export default function MessagesPage() {
   const [imageLoadingStates, setImageLoadingStates] = useState<{ [key: string]: boolean }>({})
   const [imageErrorStates, setImageErrorStates] = useState<{ [key: string]: boolean }>({})
 
+  // Call state
+  const [callOpen, setCallOpen] = useState(false)
+  const [callRoomId, setCallRoomId] = useState<string | null>(null)
+  const [callMedia, setCallMedia] = useState<"audio" | "video">("audio")
+  const [friendsList, setFriendsList] = useState<Friend[]>([])
+
   // Add refs to prevent infinite loops
   const markingAsReadRef = useRef(false)
   const lastMarkedFriendRef = useRef<string | null>(null)
@@ -110,6 +118,19 @@ export default function MessagesPage() {
 
     if (status === "authenticated") {
       fetchConversations()
+      // preload friends list for inviting to calls
+      fetch("/api/friends").then(async (r) => {
+        if (r.ok) {
+          const data = await r.json()
+          setFriendsList((data.friends || []).map((f: any) => ({
+            _id: f._id,
+            name: f.name,
+            email: f.email,
+            profileImage: f.profileImage,
+            username: f.username,
+          })))
+        }
+      }).catch(() => { })
     }
 
     return () => window.removeEventListener("resize", handleResize)
@@ -147,6 +168,42 @@ export default function MessagesPage() {
       }
     }
   }, [selectedFriendId, messages])
+
+
+  // Incoming call listener
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (status !== "authenticated") return;
+      const socket = await getSocket();
+
+      const handleIncoming = (payload: {
+        roomId: string;
+        from: string;
+        media: "audio" | "video";
+        participants: string[];
+      }) => {
+        if (!mounted) return;
+        // Optionally, show a confirm UI here. For now, auto-open:
+        setCallMedia(payload.media);
+        setCallRoomId(payload.roomId);
+        setCallOpen(true);
+      };
+
+      socket.on("call:incoming", handleIncoming);
+    })();
+
+    return () => {
+      mounted = false;
+      (async () => {
+        try {
+          const socket = await getSocket();
+          socket.off("call:incoming", handleIncoming as any);
+        } catch { }
+      })();
+    };
+  }, [status]);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -394,6 +451,41 @@ export default function MessagesPage() {
     lastMarkedFriendRef.current = null
   }
 
+  // --- Call helpers ---
+  function generateRoomId(friendId: string) {
+    // Deterministic room for 1:1 or temporary for group; for now use timestamp-based random
+    return `${Date.now()}-${friendId}-${Math.random().toString(36).slice(2, 8)}`
+  }
+
+  async function startCall(kind: "audio" | "video") {
+    if (!session?.user?.id || !selectedFriendId) return
+    const socket = await getSocket()
+
+    const roomId = generateRoomId(selectedFriendId)
+    setCallMedia(kind)
+    setCallRoomId(roomId)
+    setCallOpen(true)
+
+    // initial participants are the selected friend
+    socket.emit("call:initiate", {
+      roomId,
+      participants: [selectedFriendId],
+      media: kind,
+    })
+  }
+
+  async function inviteMoreToCall(userIds: string[]) {
+    if (!callRoomId) return
+    const socket = await getSocket()
+    if (!userIds || userIds.length === 0) return
+    // Reuse initiate event to notify additional users (server will just send incoming)
+    socket.emit("call:initiate", {
+      roomId: callRoomId,
+      participants: userIds,
+      media: callMedia,
+    })
+  }
+
   const formatMessageTime = (createdAt: string) => {
     const date = new Date(createdAt)
     const now = new Date()
@@ -566,15 +658,25 @@ export default function MessagesPage() {
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{selectedFriend.name}</h3>
                         <p className="text-blue-100 text-sm flex items-center">
-                          <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                          <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
                           Active now
                         </p>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="ghost" size="sm" className="p-2 hover:bg-white/20 text-white">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-2 hover:bg-white/20 text-white"
+                          onClick={() => startCall("audio")}
+                        >
                           <Phone className="w-5 h-5" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="p-2 hover:bg-white/20 text-white">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-2 hover:bg-white/20 text-white"
+                          onClick={() => startCall("video")}
+                        >
                           <VideoIcon className="w-5 h-5" />
                         </Button>
                         <Button variant="ghost" size="sm" className="p-2 hover:bg-white/20 text-white">
@@ -876,6 +978,19 @@ export default function MessagesPage() {
             </div>
           </div>
         </div>
+      )}
+      {/* Call Modal */}
+      {callOpen && callRoomId && session?.user?.id && (
+        <CallModal
+          isOpen={callOpen}
+          onClose={() => setCallOpen(false)}
+          roomId={callRoomId}
+          selfUserId={session.user.id}
+          invited={selectedFriendId ? [selectedFriendId] : []}
+          media={callMedia}
+          allFriends={friendsList.map((f) => ({ id: f._id, name: f.name, image: f.profileImage }))}
+          onInviteMore={(ids) => inviteMoreToCall(ids)}
+        />
       )}
     </div>
   )

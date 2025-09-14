@@ -1,16 +1,8 @@
-import type { NextRequest } from "next/server"
-import { initSocket, type NextApiResponseWithSocket } from "@/lib/socket"
-import connectDB from "@/lib/db"
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, res: NextApiResponseWithSocket) {
-  try {
-    await connectDB()
-    const io = initSocket(req as any, res)
-
-    return new Response("Socket initialized", { status: 200 })
-  } catch (error) {
-    console.error("Socket initialization error:", error)
-    return new Response("Socket initialization failed", { status: 500 })
-  }
+// App Router cannot directly initialize Socket.IO because it doesn't expose res.socket.
+// Redirect to the Pages API route that sets up Socket.IO on the Node server.
+export async function GET(req: NextRequest) {
+  const url = new URL("/api/socket-io", req.url);
+  return NextResponse.redirect(url, { status: 307 });
 }
-
